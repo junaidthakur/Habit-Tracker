@@ -28,20 +28,39 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
+      - name: Find Gradle Wrapper
+        run: |
+          echo "Searching for gradlew..."
+          find . -name gradlew -type f
 
-      - name: Verify Gradle
-        run: ./gradlew --version
+      - name: Build Android APK
+        run: |
+          GRADLEW=$(find . -name gradlew -type f | head -n 1)
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+          if [ -z "$GRADLEW" ]; then
+            echo "ERROR: gradlew was not found!"
+            exit 1
+          fi
+
+          echo "Found Gradle wrapper: $GRADLEW"
+
+          chmod +x "$GRADLEW"
+
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          cd "$PROJECT_DIR"
+
+          ./"$(basename "$GRADLEW")" assembleDebug --no-daemon --stacktrace
         env:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8"
+
+      - name: Find APK
+        run: |
+          echo "Searching for APK..."
+          find . -path "*/build/outputs/apk/*.apk" -type f
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: "**/build/outputs/apk/debug/*.apk"
           if-no-files-found: error
