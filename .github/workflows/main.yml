@@ -1,4 +1,4 @@
-name: Build Android App (Kotlin)
+name: Build Android App
 
 on:
   push:
@@ -26,41 +26,28 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Find Gradle Wrapper
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Generate Gradle Wrapper
         run: |
-          echo "Searching for gradlew..."
-          find . -name gradlew -type f
+          gradle wrapper --gradle-version 9.3.1
+          chmod +x ./gradlew
 
-      - name: Build Android APK
-        run: |
-          GRADLEW=$(find . -name gradlew -type f | head -n 1)
+      - name: Verify Gradle
+        run: ./gradlew --version
 
-          if [ -z "$GRADLEW" ]; then
-            echo "ERROR: gradlew was not found!"
-            exit 1
-          fi
-
-          echo "Found Gradle wrapper: $GRADLEW"
-
-          chmod +x "$GRADLEW"
-
-          PROJECT_DIR=$(dirname "$GRADLEW")
-          cd "$PROJECT_DIR"
-
-          ./"$(basename "$GRADLEW")" assembleDebug --no-daemon --stacktrace
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
         env:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8"
-
-      - name: Find APK
-        run: |
-          echo "Searching for APK..."
-          find . -path "*/build/outputs/apk/*.apk" -type f
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: "**/build/outputs/apk/debug/*.apk"
+          name: Habit-Tracker-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
