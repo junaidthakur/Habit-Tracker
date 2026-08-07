@@ -99,9 +99,13 @@ fun ProfileScreen(
     var editBioInput by remember { mutableStateOf(profile.userBio) }
 
     var itemToUnlockWithAd by remember { mutableStateOf<String?>(null) }
+    var showOfflineAdNoticeDialog by remember { mutableStateOf(false) }
 
     val triggerWatchAd: (String) -> Unit = { itemId ->
-        if (activity != null) {
+        val isOnline = com.example.util.NetworkUtil.isNetworkAvailable(context)
+        if (!isOnline) {
+            showOfflineAdNoticeDialog = true
+        } else if (activity != null) {
             com.example.util.AdMobManager.loadAndShowRewardedAd(
                 activity = activity,
                 onRewardEarned = {
@@ -205,6 +209,52 @@ fun ProfileScreen(
                 itemToUnlockWithAd = null
             },
             onDismiss = { itemToUnlockWithAd = null }
+        )
+    }
+
+    if (showOfflineAdNoticeDialog) {
+        AlertDialog(
+            onDismissRequest = { showOfflineAdNoticeDialog = false },
+            title = {
+                Text(
+                    text = when (lang) {
+                        "bn" -> "🌐 ইন্টারনেট সংযোগ প্রয়োজন"
+                        "es" -> "🌐 Conexión Requerida"
+                        "hi" -> "🌐 इंटरनेट कनेक्शन आवश्यक"
+                        "ar" -> "🌐 الاتصال بالإنترنت مطلوب"
+                        else -> "🌐 Network Connection Required"
+                    },
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = when (lang) {
+                        "bn" -> "বিজ্ঞাপন দেখে আনলক করতে ইন্টারনেট সংযোগ প্রয়োজন। অনুগ্রহ করে আপনার ইন্টারনেট বা ওয়াইফাই ডাটা সংযোগ চালু করুন।\n\nঅ্যাপটির সকল সাধারণ ফিচার, কাস্টম থিম, ভাষা এবং অভ্যাস ট্র্যাকিং ১০০% অফলাইনে ব্যবহার করা যাবে।"
+                        "es" -> "Se requiere conexión a Internet para ver anuncios y desbloquear elementos. Conéctate a una red.\n\nTodas las funciones principales de la aplicación funcionan 100% sin conexión."
+                        "hi" -> "विज्ञापन देखकर अनलॉक करने के लिए इंटरनेट आवश्यक है। कृपया अपना इंटरनेट चालू करें।\n\nऐप की अन्य सभी सुविधाएं ऑफ़लाइन काम करती हैं।"
+                        "ar" -> "يلزم الاتصال بالإنترنت لمشاهدة الإعلانات وفتح المكافآت.\n\nجميع الميزات الرئيسية تعمل 100% بدون إنترنت."
+                        else -> "An active internet connection is required to watch sponsored ads to unlock rewards.\n\nNote: All core habit tracking, statistics, and garden features work 100% offline."
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showOfflineAdNoticeDialog = false },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "ঠিক আছে"
+                            "es" -> "Entendido"
+                            "hi" -> "ठीक है"
+                            "ar" -> "حسناً"
+                            else -> "Got It"
+                        }
+                    )
+                }
+            }
         )
     }
 
@@ -358,6 +408,17 @@ fun ProfileScreen(
                     }
                 }
             }
+        }
+
+        // Theme Mode (Light/Dark/System) Card
+        item {
+            ThemeModeSelectionCard(
+                currentMode = profile.themeMode,
+                lang = lang,
+                onModeSelected = { newMode ->
+                    viewModel.updateThemeMode(newMode)
+                }
+            )
         }
 
         // Language Selector Card
@@ -1228,4 +1289,97 @@ fun SimulatedRewardedAdDialog(
         },
         dismissButton = null
     )
+}
+
+@Composable
+fun ThemeModeSelectionCard(
+    currentMode: String,
+    lang: String,
+    onModeSelected: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Palette,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = when (lang) {
+                        "bn" -> "🌓 ডার্ক ও লাইট থিম মোড (Dark/Light Mode)"
+                        "es" -> "🌓 Modo Oscuro / Claro"
+                        "hi" -> "🌓 डार्क और लाइट मोड (Dark/Light Mode)"
+                        "ar" -> "🌓 الوضع الداكن والفاتح"
+                        else -> "🌓 Dark & Light Theme Mode"
+                    },
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val modes = listOf(
+                    "light" to when (lang) {
+                        "bn" -> "☀️ লাইট"
+                        "es" -> "☀️ Claro"
+                        "hi" -> "☀️ लाइट"
+                        "ar" -> "☀️ فاتح"
+                        else -> "☀️ Light"
+                    },
+                    "dark" to when (lang) {
+                        "bn" -> "🌙 ডার্ক"
+                        "es" -> "🌙 Oscuro"
+                        "hi" -> "🌙 ডার্ক"
+                        "ar" -> "🌙 داكن"
+                        else -> "🌙 Dark"
+                    },
+                    "system" to when (lang) {
+                        "bn" -> "📱 সিস্টেম"
+                        "es" -> "📱 Sistema"
+                        "hi" -> "📱 सिस्टम"
+                        "ar" -> "📱 النظام"
+                        else -> "📱 System"
+                    }
+                )
+
+                modes.forEach { (mode, label) ->
+                    val isSelected = currentMode == mode
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onModeSelected(mode) },
+                        label = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
 }

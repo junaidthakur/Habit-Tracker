@@ -38,6 +38,7 @@ data class StatisticsData(
 class HabitViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: HabitRepository
+    private val prefsRepo = com.example.util.PreferencesRepository(application)
 
     val activeHabits: StateFlow<List<HabitEntity>>
 
@@ -59,8 +60,13 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
     private val _statistics = MutableStateFlow(StatisticsData())
     val statistics: StateFlow<StatisticsData> = _statistics.asStateFlow()
 
-    private val _userProfile = MutableStateFlow(UserProfile())
+    private val _userProfile = MutableStateFlow(prefsRepo.loadUserProfile())
     val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
+
+    private fun saveProfile(updatedProfile: UserProfile) {
+        _userProfile.value = updatedProfile
+        prefsRepo.saveUserProfile(updatedProfile)
+    }
 
     init {
         val db = AppDatabase.getInstance(application)
@@ -218,34 +224,40 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
     // --- Profile & Rewards Unlock System Methods ---
 
     fun updateLanguage(langCode: String) {
-        _userProfile.value = _userProfile.value.copy(language = langCode)
+        saveProfile(_userProfile.value.copy(language = langCode))
+    }
+
+    fun updateThemeMode(mode: String) {
+        saveProfile(_userProfile.value.copy(themeMode = mode))
     }
 
     fun updateProfileNameAndBio(name: String, bio: String) {
         val lang = _userProfile.value.language
         val defaultName = if (lang == "bn") "সবুজ যাত্রী" else "Green Voyager"
         val defaultBio = if (lang == "bn") "ক্ষতিকর অভ্যাস ত্যাগ করার সংকল্প।" else "Committed to breaking bad habits & growing a healthier life."
-        _userProfile.value = _userProfile.value.copy(
-            userName = name.ifBlank { defaultName },
-            userBio = bio.ifBlank { defaultBio }
+        saveProfile(
+            _userProfile.value.copy(
+                userName = name.ifBlank { defaultName },
+                userBio = bio.ifBlank { defaultBio }
+            )
         )
     }
 
     fun selectAvatar(avatarId: String) {
-        _userProfile.value = _userProfile.value.copy(selectedAvatarId = avatarId)
+        saveProfile(_userProfile.value.copy(selectedAvatarId = avatarId))
     }
 
     fun selectTheme(themeId: String) {
-        _userProfile.value = _userProfile.value.copy(selectedThemeId = themeId)
+        saveProfile(_userProfile.value.copy(selectedThemeId = themeId))
     }
 
     fun selectPlantSkin(skinId: String) {
-        _userProfile.value = _userProfile.value.copy(selectedPlantSkinId = skinId)
+        saveProfile(_userProfile.value.copy(selectedPlantSkinId = skinId))
     }
 
     fun unlockItemWithAd(itemId: String) {
         val currentSet = _userProfile.value.unlockedItemIds.toMutableSet()
         currentSet.add(itemId)
-        _userProfile.value = _userProfile.value.copy(unlockedItemIds = currentSet)
+        saveProfile(_userProfile.value.copy(unlockedItemIds = currentSet))
     }
 }

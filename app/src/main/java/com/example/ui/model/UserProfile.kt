@@ -349,6 +349,7 @@ data class UserProfile(
     val userBio: String = "Committed to breaking bad habits & growing a healthier life.",
     val selectedAvatarId: String = "avatar_sprout",
     val selectedThemeId: String = "vibrant",
+    val themeMode: String = "system", // "system", "light", "dark"
     val selectedPlantSkinId: String = "skin_natural",
     val language: String = "en", // Default language is English ("en")
     val unlockedItemIds: Set<String> = setOf("avatar_sprout", "vibrant", "skin_natural")

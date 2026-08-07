@@ -59,7 +59,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val userProfile by habitViewModel.userProfile.collectAsStateWithLifecycle()
 
-            HabitTrackerTheme(selectedThemeId = userProfile.selectedThemeId) {
+            HabitTrackerTheme(
+                selectedThemeId = userProfile.selectedThemeId,
+                themeMode = userProfile.themeMode
+            ) {
                 MainAppScreen(viewModel = habitViewModel)
             }
         }
