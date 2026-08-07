@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android App (APK & Play Store AAB)
 
 on:
   push:
@@ -43,9 +43,19 @@ jobs:
       - name: Build Debug APK
         run: gradle assembleDebug --stacktrace
 
+      - name: Build Release App Bundle (AAB for Play Store)
+        run: gradle bundleRelease --stacktrace
+
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+      - name: Upload Play Store Release AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: app/build/outputs/bundle/release/*.aab
           retention-days: 7

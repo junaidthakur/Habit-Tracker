@@ -2,6 +2,8 @@ package com.example.ui.screens
 
 import com.example.util.AppStrings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,9 +36,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.OndemandVideo
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -46,6 +50,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -428,6 +433,13 @@ fun ProfileScreen(
                 onLanguageSelected = { newLang ->
                     viewModel.updateLanguage(newLang)
                 }
+            )
+        }
+
+        // Privacy Policy Card
+        item {
+            PrivacyPolicyCard(
+                lang = lang
             )
         }
 
@@ -1377,6 +1389,229 @@ fun ThemeModeSelectionCard(
                             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PrivacyPolicyCard(
+    lang: String,
+    modifier: Modifier = Modifier
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val privacyUrl = "https://junaidthakur.github.io/Privacy-policy/"
+    var showPrivacyDialog by remember { mutableStateOf(false) }
+
+    val openInBrowser = {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl))
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    if (showPrivacyDialog) {
+        AlertDialog(
+            onDismissRequest = { showPrivacyDialog = false },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.PrivacyTip,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "প্রাইভেসি পলিসি"
+                            "es" -> "Política de Privacidad"
+                            "hi" -> "गोपनीयता नीति"
+                            "ar" -> "سياسة الخصوصية"
+                            else -> "Privacy Policy"
+                        },
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "আপনার তথ্যের সুরক্ষা আমাদের কাছে সর্বোচ্চ অগ্রাধিকার।\n\n• এই অ্যাপের সকল তথ্য (অভ্যাস, পরিসংখ্যান, টাইমার) আপনার ডিভাইসেই নিরাপদে সংরক্ষিত থাকে।\n• আমরা কোনো ব্যক্তিগত তথ্য তৃতীয় পক্ষের কাছে শেয়ার বা বিক্রি করি না।\n• সম্পূর্ণ প্রাইভেসি পলিসি দেখতে নিচের লিঙ্কে ক্লিক করুন।"
+                            "es" -> "Tu privacidad es nuestra máxima prioridad.\n\n• Todos los datos de hábitos permanecen en tu dispositivo de forma segura.\n• No compartimos ni vendemos información personal.\n• Haz clic a continuación para ver la política completa."
+                            "hi" -> "आपकी निजता हमारी सर्वोच्च प्राथमिकता है।\n\n• आपकी सभी आदतें और आंकड़े आपके डिवाइस पर सुरक्षित रहते हैं।\n• हम कोई व्यक्तिगत डेटा साझा नहीं करते हैं।\n• पूरी नीति देखने के लिए नीचे क्लिक करें।"
+                            "ar" -> "خصوصيتك هي أولويتنا القصوى.\n\n• تعتمد جميع بيانات العادات على الحفظ المحلي في جهازك.\n• لا نشارك بياناتك مع أي طرف ثالث.\n• انقر أدناه للاطلاع على السياسة الكاملة."
+                            else -> "Your privacy is our top priority.\n\n• All habit tracking data is stored locally on your device.\n• We do not share or collect personal information.\n• Tap below to read the complete online privacy policy."
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = privacyUrl,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showPrivacyDialog = false
+                        openInBrowser()
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.OpenInNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "ওয়েবসাইটে পলিসি দেখুন"
+                            "es" -> "Abrir en Navegador"
+                            "hi" -> "वेबसाइट पर देखें"
+                            "ar" -> "فتح في المتصفح"
+                            else -> "Open Full Policy"
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPrivacyDialog = false }) {
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "বন্ধ করুন"
+                            "es" -> "Cerrar"
+                            "hi" -> "बंद करें"
+                            "ar" -> "إغلاق"
+                            else -> "Close"
+                        }
+                    )
+                }
+            }
+        )
+    }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { openInBrowser() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PrivacyTip,
+                        contentDescription = "Privacy Policy",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = when (lang) {
+                                "bn" -> "প্রাইভেসি পলিসি (Privacy Policy)"
+                                "es" -> "Política de Privacidad"
+                                "hi" -> "गोपनीयता नीति"
+                                "ar" -> "سياسة الخصوصية"
+                                else -> "Privacy Policy"
+                            },
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = when (lang) {
+                                "bn" -> "আমাদের প্রাইভেসি পলিসি দেখতে এখানে ক্লিক করুন"
+                                "es" -> "Haz clic para ver nuestra política de privacidad"
+                                "hi" -> "हमारी गोपनीयता नीति देखने के लिए यहां क्लिक करें"
+                                "ar" -> "انقر للاطلاع على سياسة الخصوصية"
+                                else -> "Click to view our Privacy Policy"
+                            },
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                }
+
+                IconButton(onClick = { openInBrowser() }) {
+                    Icon(
+                        imageVector = Icons.Default.OpenInNew,
+                        contentDescription = "Open Link",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { showPrivacyDialog = true },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "সংক্ষিপ্ত বিবরণ"
+                            "es" -> "Resumen"
+                            "hi" -> "विवरण"
+                            "ar" -> "الملخص"
+                            else -> "Overview"
+                        },
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                Button(
+                    onClick = { openInBrowser() },
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .testTag("privacy_policy_button"),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.OpenInNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = when (lang) {
+                            "bn" -> "প্রাইভেসি পলিসি লিঙ্ক"
+                            "es" -> "Ver Política"
+                            "hi" -> "পলিসি লিংক"
+                            "ar" -> "رابط السياسة"
+                            else -> "Open Policy Link"
+                        },
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
