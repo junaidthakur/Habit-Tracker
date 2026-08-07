@@ -35,11 +35,8 @@ jobs:
             echo "Decoded debug.keystore successfully"
           fi
 
-      - name: Make Gradle Wrapper Executable
-        run: chmod +x gradlew
-
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
