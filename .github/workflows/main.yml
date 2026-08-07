@@ -21,8 +21,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle
+    - name: Setup Gradle without Caching
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-disabled: true
 
     - name: Generate Gradle Wrapper if missing
       run: |
@@ -32,7 +34,7 @@ jobs:
         chmod +x gradlew
 
     - name: Build APK with Gradle
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
