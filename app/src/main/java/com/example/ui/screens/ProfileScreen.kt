@@ -183,15 +183,6 @@ fun ProfileScreen(
                 }
             }
         )
-    }          "es" -> "Cancelar"
-                            "hi" -> "रद्द करें"
-                            "ar" -> "إلغاء"
-                            else -> "Cancel"
-                        }
-                    )
-                }
-            }
-        )
     }
 
     // Rewarded Ad Simulation Overlay
