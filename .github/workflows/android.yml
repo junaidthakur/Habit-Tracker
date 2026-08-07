@@ -24,13 +24,18 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
 
-      - name: Generate Gradle Wrapper (if missing)
+      - name: Restore Debug Keystore
         run: |
-          if [ ! -f ./gradlew ]; then
-            gradle wrapper
+          if [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+            echo "Decoded debug.keystore successfully"
           fi
-          chmod +x gradlew
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x gradlew
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
@@ -39,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/*.apk
           retention-days: 7
